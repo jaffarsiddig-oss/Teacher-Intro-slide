@@ -3,118 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Intro Slide Generator</title>
+    <title>Vedantu Demo Suite</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;600;800&family=Nunito:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Great+Vibes&family=Montserrat:wght@400;700;900&family=Nunito:wght@400;600;800&display=swap');
 
-        body { font-family: 'Nunito', sans-serif; background: #fdf6ec; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        body { font-family: 'Montserrat', sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         
-        /* Panel Styles */
-        .panel { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border-top: 5px solid #ff7a59; }
-        input, textarea { width: 95%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .btn { background: #ff7a59; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
-        .btn-dl { background: #2ecc71; margin-top: 10px; display: none; }
+        /* Tab Navigation */
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 12px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; background: #ddd; color: #555; transition: 0.3s; }
+        .tab-btn.active { background: #ff4500; color: white; }
 
-        /* Slide Canvas Styles */
-        #slide { 
-            width: 1024px; height: 576px; background: #fff; position: relative; overflow: hidden; display: none;
-            background-image: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.7)), url('https://img.freepik.com/free-vector/watercolor-back-school-background_23-2149450791.jpg');
-            background-size: cover; border: 10px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        .panel { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; display: none; }
+        .panel.active { display: block; border-top: 6px solid #ff4500; }
+        
+        input, select, textarea { padding: 12px; width: 92%; margin: 8px 0; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+        .btn-gen { background: #ff4500; color: #fff; padding: 15px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 95%; margin-top: 10px; }
+        .btn-dl { background: #28a745; color: #fff; padding: 12px 25px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: none; margin: 15px auto; }
+
+        /* --- SLIDE CANVAS --- */
+        #slidePreview { 
+            display: none; width: 1024px; height: 576px; background: #fff; position: relative; overflow: hidden; margin-top: 20px;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0.6)), url('https://img.freepik.com/free-vector/watercolor-back-school-background_23-2149450791.jpg');
+            background-size: cover; border: 8px solid #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         }
 
-        .teacher-frame { position: absolute; right: 50px; bottom: 0; width: 350px; height: 500px; display: flex; align-items: flex-end; justify-content: center; z-index: 5; }
-        #teacherPhoto { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .content-box { position: absolute; left: 60px; top: 50px; width: 520px; text-align: left; z-index: 10; }
+        .t-name { font-family: 'Great Vibes', cursive; font-size: 75px; color: #2c3e50; margin: 0; }
+        .t-tag { color: #ff4500; font-weight: 800; border-bottom: 3px solid #ff4500; display: inline-block; margin-bottom: 15px; text-transform: uppercase; }
+        .t-points { list-style: none; padding: 0; margin-top: 20px; }
+        .t-point { display: flex; align-items: center; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 18px; }
+        .t-icon { background: #ff4500; color: white; width: 30px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; }
 
-        .content-area { position: absolute; left: 60px; top: 50px; width: 550px; z-index: 10; }
-        .teacher-name { font-family: 'Great Vibes', cursive; font-size: 60px; color: #2c3e50; margin: 0; }
-        .designation { font-family: 'Montserrat', sans-serif; font-size: 20px; color: #ff7a59; border-bottom: 2px solid #ff7a59; display: inline-block; padding-bottom: 5px; margin-bottom: 20px; font-weight: 600; }
-        
-        .intro-text { font-size: 22px; line-height: 1.4; color: #444; margin-bottom: 30px; font-weight: 400; }
-        
-        .point { display: flex; align-items: flex-start; margin-bottom: 18px; text-align: left; }
-        .icon { background: #ff7a59; color: white; width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0; font-weight: bold; font-size: 14px; }
-        .point-text { font-size: 18px; color: #2c3e50; line-height: 1.3; }
+        .photo-wrap { position: absolute; right: 40px; bottom: 0; width: 400px; height: 530px; display: flex; align-items: flex-end; justify-content: center; }
+        #dispImg { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .v-logo { position: absolute; top: 25px; right: 35px; height: 55px; opacity: 0.9; }
 
-        .badge-stars { position: absolute; top: 20px; right: 20px; width: 100px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-<div class="panel">
-    <h2 style="color: #ff7a59; margin-top: 0;">Teacher Intro Slide</h2>
-    <input type="file" id="photoInput" accept="image/*">
-    <input type="text" id="name" placeholder="Teacher Name (e.g. Ms. Sarah)">
-    <input type="text" id="exp" placeholder="Experience (e.g. 5+ Years)">
-    <textarea id="intro" rows="2">Good evening, I'm [Name], an English Phonics educator with [X years] of experience.</textarea>
-    <input type="text" id="p1" placeholder="Point 1: e.g. Specialize in foundational reading skills">
-    <input type="text" id="p2" placeholder="Point 2: e.g. Interactive and engaging approach">
-    <input type="text" id="p3" placeholder="Point 3: e.g. Goal to create confident young readers">
-    
-    <button class="btn" onclick="generateSlide()">Create Slide ✨</button>
-    <button id="dlBtn" class="btn btn-dl" onclick="downloadSlide()">Download Slide 📥</button>
-</div>
-
-<div id="slide">
-    <img src="https://www.pngarts.com/files/4/Golden-Stars-PNG-Image-Background.png" class="badge-stars">
-    
-    <div class="content-area">
-        <h1 class="teacher-name" id="dispName">Ms. Teacher Name</h1>
-        <div class="designation" id="dispExp">English Phonics Educator | X Years Experience</div>
-        
-        <p class="intro-text" id="dispIntro"></p>
-
-        <div class="point">
-            <div class="icon">AB</div>
-            <div class="point-text" id="dispP1">Specialize in building strong foundational reading skills through systematic phonics instruction.</div>
-        </div>
-        <div class="point">
-            <div class="icon">💡</div>
-            <div class="point-text" id="dispP2">My approach is interactive, engaging, and focused on sound clarity and fluency.</div>
-        </div>
-        <div class="point">
-            <div class="icon">✨</div>
-            <div class="point-text" id="dispP3">My goal is to create confident young readers by making learning structured and fun.</div>
-        </div>
+    <div class="nav-tabs">
+        <button id="btn1" class="tab-btn active" onclick="showMode('cert')">Certificate</button>
+        <button id="btn2" class="tab-btn" onclick="showMode('teacher')">Teacher Intro</button>
     </div>
 
-    <div class="teacher-frame">
-        <img id="teacherPhoto" src="" style="display:none;">
+    <div id="teacherPanel" class="panel active">
+        <h2 style="color:#ff4500">Teacher Intro Generator</h2>
+        <div style="background:#fff5f0; padding:10px; border-radius:8px; border:1px dashed #ff4500; margin-bottom:10px;">
+            <label style="font-size:12px; font-weight:bold; color:#ff4500;">Upload Teacher Photo</label>
+            <input type="file" id="tPhoto" accept="image/*" style="border:none;">
+        </div>
+        <input type="text" id="name" placeholder="Name (e.g. Ms. Sarah)">
+        <input type="text" id="exp" placeholder="Experience (e.g. 8+ Years)">
+        <textarea id="intro" rows="2" placeholder="Brief intro sentence..."></textarea>
+        <input type="text" id="p1" placeholder="Achievement 1">
+        <input type="text" id="p2" placeholder="Achievement 2">
+        <button class="btn-gen" onclick="generateSlide()">Create Intro Slide ✨</button>
     </div>
-</div>
 
-<script>
-    function generateSlide() {
-        const file = document.getElementById('photoInput').files[0];
-        if(!file) { alert("Please upload your photo first!"); return; }
+    <button id="dlBtn" class="btn-dl" onclick="download()">Download PNG 📥</button>
 
-        document.getElementById('dispName').innerText = document.getElementById('name').value;
-        document.getElementById('dispExp').innerText = "English Phonics Educator | " + document.getElementById('exp').value;
-        document.getElementById('dispIntro').innerText = document.getElementById('intro').value;
-        document.getElementById('dispP1').innerText = document.getElementById('p1').value;
-        document.getElementById('dispP2').innerText = document.getElementById('p2').value;
-        document.getElementById('dispP3').innerText = document.getElementById('p3').value;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.getElementById('teacherPhoto');
-            img.src = e.target.result;
-            img.style.display = 'block';
-            document.getElementById('slide').style.display = 'block';
-            document.getElementById('dlBtn').style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-    }
-
-    function downloadSlide() {
-        html2canvas(document.getElementById('slide'), { scale: 2 }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'Teacher_Intro_Slide.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        });
-    }
-</script>
-
-</body>
-</html>
+    <div id="slidePreview">
+        <img src="https://upload.
